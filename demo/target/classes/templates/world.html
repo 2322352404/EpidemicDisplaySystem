@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>新冠疫情数据动态展示系统</title>
+    <!---<script src="https://cdnjs.cloudflare.com/ajax/libs/layui/2.6.5/layui.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/layui/2.6.5/css/layui.min.css"/>-->
+    <script src="/layui.js"></script>
+    <link rel="stylesheet" href="/layui.css">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.6.0/echarts.min.js"></script>
+    <script src="/world.js" charset="UTF-8"></script>
+    <script src="/world.js" charset="UTF-8"></script>
+    <script type="text/javascript">
+        var confirm_data = [];
+        var name_data = new Array();
+        var dead_data = new Array();
+        var heal_data = new Array();
+        var vaccined_data = new Array();
+        var name1_data = new Array();
+        var date = [];
+        $.ajax({
+            url: "/api/getworlddata",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    confirm_data[i] = data[i].confirm;
+                    name_data.push(data[i].name);
+                    dead_data.push(data[i].dead);
+                    heal_data.push(data[i].heal);
+                    date.push(data[i].date);
+                }
+                //console.log(data);
+            }
+        });
+        $.ajax({
+            url: "/api/getvaccinesdata",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    vaccined_data.push(data[i].vaccinednum);
+                    name1_data.push(data[i].name);
+                }
+                //console.log(data);
+            }
+        });
+        var datas = [];
+        var confirmsum = 0;
+        var deadsum = 0;
+        var healsum = 0;
+        for (let i = 0; i < confirm_data.length; i++) {
+            var data = {};
+            data['name'] = name_data[i];
+            data['value'] = confirm_data[i];
+            data['dead'] = dead_data[i];
+            data['heal'] = heal_data[i];
+            datas.push(data);
+            confirmsum = confirmsum + confirm_data[i];
+            deadsum = deadsum + dead_data[i];
+            healsum = healsum + heal_data[i];
+        }
+        var vdatas = [];
+        var vaccinedsum = 0;
+        for (let j = 0; j < vaccined_data.length; j++) {
+            var vaccined = {};
+            vaccined['name'] = name1_data[j];
+            vaccined['value'] = vaccined_data[j];
+            vdatas.push(vaccined);
+            vaccinedsum = vaccinedsum + vaccined_data[j];
+        }
+
+        var confirm_sum = [];
+        var dead_sum = [];
+        var heal_sum = [];
+        var date1 = [];
+
+        $.ajax({
+            url: "/api/countrysum",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    confirm_sum.push(data[i].confirm);
+                    dead_sum.push(data[i].dead);
+                    heal_sum.push(data[i].heal);
+                    date1.push(data[i].date);
+
+                }
+                //console.log(data);
+            }
+        });
+        console.log(date1);
+        var option1 = {
+            tooltip: {
+                trigger: 'axis',
+
+            },
+            title: {
+                text: '世界总体情况',
+                subtext: '点击图例可切换展示'
+            },
+            legend: {
+                data: ['确诊人数', '死亡人数', '治愈人数']
+            },
+            xAxis: {
+                type: 'category',
+                data: date1
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                name: "确诊人数",
+                type: 'line',
+                smooth: true,
+                data: confirm_sum
+            },
+                {
+                    name: "死亡人数",
+                    type: 'line',
+                    smooth: true,
+                    data: dead_sum
+                },
+                {
+                    name: "治愈人数",
+                    type: 'line',
+                    smooth: true,
+                    data: heal_sum
+                }
+            ]
+        }
+        var worlddatas = [];
+        for (let i = 0; i < date1.length; i++) {
+            var worlddata = {};
+            worlddata['date'] = date1[i];
+            worlddata['confirm'] = confirm_sum[i];
+            worlddata['dead'] = dead_sum[i];
+            worlddata['heal'] = heal_sum[i];
+            worlddatas.push(worlddata);
+        }
+
+    </script>
+</head>
+<body style="background: #CCFFFF;background-size: cover">
+<br><br><br>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" style="background: #FFFFFF;background-size: cover">
+        <div class="layui-logo"><a href="/" style="color: #5FB878">疫情数据可视化展示系统</a></div>
+        <ul class="layui-nav layui-layout-right">
+            <form class="layout-form" action="/search" method="post">
+                <li class="layui-nav-item">
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <input type="text" name="keyword" placeholder="请输入国家或省份" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                </li>
+                <li class="layui-nav-item" style="text-align: left">
+                    <div class="layui-form-item" style="text-align: left">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" name="button" lay-submit lay-filter="*">搜索</button>
+                        </div>
+                    </div>
+                </li>
+            </form>
+        </ul>
+    </div>
+    <div class="layui-main" align="left" style="width: 1440px">
+        <br><br><br>
+        <div align="right">最近更新时间:<span>
+            <script type="text/javascript">
+                var mydate = new Date();
+                var year = mydate.getFullYear();
+                var month = mydate.getMonth() + 1;
+                var date = mydate.getDate();
+                var hour = mydate.getHours();
+                var minute = mydate.getMinutes();
+                var yesterday = date - 1;
+                if (hour < 14) {
+                    document.write(year + '-' + month + '-' + yesterday + ' ' + '14:00');
+                } else {
+                    document.write(year + '-' + month + '-' + date + ' ' + '14:00');
+                }
+
+            </script>
+        </span></div>
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md6">
+                <div class="layui-panel">
+                    <div style="padding: 10px;">
+                        <div><font size="6px">世界累计数据:</font></div>
+                        <br>
+                        <div class="layui-panel">
+                            <div class="layui-row">
+                                <div class="layui-col-md3">
+                                    <div align="center">确诊人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(confirmsum);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">死亡人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(deadsum);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">治愈人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(healsum);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">接种人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(vaccinedsum);</script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-panel">
+                    <div style="padding: 10px;">
+                        <div><font size="6px">世界今日数据:</font></div>
+                        <br>
+                        <div class="layui-panel">
+                            <div class="layui-row">
+                                <div class="layui-col-md3">
+                                    <div align="center">现有确诊</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(confirmsum - deadsum - healsum);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">新增确诊</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(confirm_sum[confirm_sum.length - 1] - confirm_sum[confirm_sum.length - 2]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">新增死亡</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(dead_sum[dead_sum.length - 1] - dead_sum[dead_sum.length - 2]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">新增治愈</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(heal_sum[heal_sum.length - 1] - heal_sum[heal_sum.length - 2]);</script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div style="color: #99CCFF;font-size:40px ">世界各国感染情况:</div>
+        <div id="main" style="width: 1500px;height:800px;background: white"></div>
+        <form id="form" method="get" action="/getprovincedata">
+            <input name="name" method="post" type="text" hidden="true">
+            <input id="sub" type="submit" value="dad" hidden="true">
+        </form>
+        <br/>
+        <script th:inline="javascript" type="text/javascript">
+
+            var mychart = echarts.init(document.getElementById("main"));
+            var options = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function (params) {
+                        var res = params.name + '<br/>';
+                        var myseries = options.series;
+                        for (var i = 0; i < myseries.length; i++) {
+                            for (var j = 0; j < myseries[i].data.length; j++) {
+                                if (myseries[i].data[j].name == params.name) {
+                                    if (i == 0) {
+                                        res = res + '确诊人数：' + params['data'].value + '<br/>' + '死亡人数 : '
+                                            + params['data'].dead + '<br/>' + '治愈人数 : '
+                                            + params['data'].heal + '<br/>';
+                                    } else {
+                                        res += myseries[i].name + ' : ' + myseries[i].data[j].value + '</br>';
+                                    }
+
+                                }
+
+                            }
+                        }
+                        return res;
+                    }
+                },
+                title: {
+                    subtext: "单击国家可跳转到相应国家页面"
+                },
+                visualMap: {
+                    min: 0,
+                    max: 2000000,
+                    left: 'left',
+                    top: 'bottom',
+                    seriesIndex: 0,
+                    text: ['多', '少'],
+                    calculable: true,
+                    inRange: {
+                        color: ['lightskyblue', 'yellow', 'orangered']
+                    },
+                },
+                geo: {
+                    map: 'world',
+                },
+                series: [
+                    {
+                        name: '确诊人数',
+                        type: 'map',
+                        map: 'world',
+                        mapValueCalculation: 'min',
+                        data: datas
+                    },
+                    {
+                        name: '接种人数',
+                        type: 'map',
+                        map: 'world',
+                        data: vdatas
+                    }
+                ]
+            }
+            mychart.setOption(options);
+            mychart.on('click', function (params) {
+                var name = params.name;
+                $.ajax({
+                    url: "/getcountrydata",
+                    type: "get",
+                    data: {'name': name},
+                    async: false,
+                    success: function (data) {
+                        window.location.href = "/getcountrydata?name=" + name;
+                    }
+                })
+
+            });
+        </script>
+        <div style="color: #99CCFF"><font size="8px">图表展示:</font></div>
+        <!---<div class="layui-row layui-col-space10" style="width: 1500px">
+            <div class="layui-col-md12" style="background: white;height:500px" id="chart1">
+            <script type="text/javascript">
+                var chart1=echarts.init(document.getElementById('chart1'));
+                chart1.setOption(option1);
+            </script>
+            </div>--->
+        <div class="layui-tab layui-tab-card" style="width:1500px">
+            <ul class="layui-tab-title">
+                <li class="layui-this">总体情况</li>
+                <li>确诊数前10国家情况</li>
+            </ul>
+            <div class="layui-tab-content" style="height: 500px;background: white">
+                <div class="layui-tab-item layui-show">
+                    <div id="chart1" style="height: 500px;width:1500px"></div>
+                    <div align="center" style="background: white;width:1500px">
+                        <form><input type="button" class="layui-btn layui-btn-radius layui-btn-normal layui-lg"
+                                     value="导出数据"></form>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    var chart1 = echarts.init(document.getElementById('chart1'));
+                    chart1.setOption(option1);
+                </script>
+                <div class="layui-tab-item" id="chart2" style="height: 500px;width:1500px"></div>
+                <script type="text/javascript" th:inline="javascript">
+                    var max10_confirm = [];
+                    var max10_dead = [];
+                    var max10_heal = [];
+                    var max10_name = [];
+                    for (let i = 0; i < 10; i++) {
+                        max10_name.push(datas[i].name);
+                        max10_confirm.push(datas[i].value);
+                        max10_dead.push(datas[i].dead);
+                        max10_heal.push(datas[i].heal);
+                    }
+                    chart2 = echarts.init(document.getElementById("chart2"));
+                    option2 = {
+                        tooltip: {
+                            trigger: 'axis',
+
+                        },
+                        title: {
+                            subtext: '点击图例可切换展示'
+                        },
+                        legend: {
+                            data: ['确诊人数', '死亡人数', '治愈人数']
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: max10_name
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            name: '确诊人数',
+                            type: 'bar',
+                            data: max10_confirm
+                        },
+                            {
+                                name: '死亡人数',
+                                type: 'bar',
+                                data: max10_dead
+                            },
+                            {
+                                name: '治愈人数',
+                                type: 'bar',
+                                data: max10_heal
+                            }
+                        ]
+                    };
+                    chart2.setOption(option2);
+                </script>
+            </div>
+        </div>
+    </div>
+    <!---<div class="layui-col-md5 layui-col-md-offset1" style="background: white;height: 500px" id="chart2">
+
+    </div>-->
+
+    <script type="text/javascript">
+        //var fields = ['date', 'confirm','dead','heal'];
+        //console.log(worlddatas);
+        /*var csv = json2csv({ data: worlddatas, fields: fields });
+        console.log(csv);*/
+        var csv = 'date,confirm,dead,heal' + '\n';
+        for (let i = 0; i < worlddatas.length; i++) {
+            csv = csv + worlddatas[i].date + ',' + worlddatas[i].confirm + ',' + worlddatas[i].dead + ',' + worlddatas[i].heal + '\n';
+        }
+        //console.log(csv);
+        var eleButton = document.querySelector('input[type="button"]');
+        var funDownload = function (content, filename) {
+            var eleLink = document.createElement('a');
+            eleLink.download = filename;
+            eleLink.style.display = 'none';
+            // 字符内容转变成blob地址
+            var blob = new Blob([content]);
+            eleLink.href = URL.createObjectURL(blob);
+            // 触发点击
+            document.body.appendChild(eleLink);
+            eleLink.click();
+            // 然后移除
+            document.body.removeChild(eleLink);
+        };
+        if ('download' in document.createElement('a')) {
+            // 作为test.html文件下载
+            eleButton.addEventListener('click', function () {
+                funDownload(csv, '世界.csv');
+            });
+        } else {
+            eleButton.onclick = function () {
+                alert('浏览器不支持');
+            };
+        }
+    </script>
+</div>
+</div>
+</div>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+</script>
+</body>
+</html>

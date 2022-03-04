@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${province}"></title>
+    <!--<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/layui/2.6.5/layui.js}"></script>
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/layui/2.6.5/css/layui.min.css}"/>-->
+    <script src="/layui.js"></script>
+    <link rel="stylesheet" href="/layui.css">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.6.0/echarts.min.js"></script>
+    <script type="text/javascript" th:inline="javascript">
+        var data1 = [[${data}]];
+        var data = $.parseJSON(data1);
+        var date1 = [];
+        var confirmSeries = [];
+        var deadSeries = [];
+        var healSeries = [];
+        for (let i = 0; i < data.length; i++) {
+            date1.push(data[i].date);
+            confirmSeries.push(data[i].confirm);
+            deadSeries.push(data[i].dead);
+            healSeries.push(data[i].heal);
+        }
+        var len = date1.length;
+        /*console.log(data);
+        console.log(date1);*/
+    </script>
+</head>
+<body style="background: #CCFFFF;background-size: cover">
+<br><br><br>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" style="background: #FFFFFF;background-size: cover">
+        <div class="layui-logo"><a href="/" style="color:#5FB878">疫情数据可视化展示系统</a></div>
+        <ul class="layui-nav layui-layout-right">
+            <form class="layout-form" action="/search" method="post">
+                <li class="layui-nav-item">
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <input type="text" name="keyword" placeholder="请输入国家或省份" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                </li>
+                <li class="layui-nav-item" style="text-align: left">
+                    <div class="layui-form-item" style="text-align: left">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" name="button" lay-submit lay-filter="*">搜索</button>
+                        </div>
+                    </div>
+                </li>
+            </form>
+        </ul>
+    </div>
+    <div class="layui-main" align="left" style="width: 1440px" id="body">
+        <br><br><br>
+        <div align="right">最近更新时间:<span>
+            <script type="text/javascript">
+                var mydate = new Date();
+                var year = mydate.getFullYear();
+                var month = mydate.getMonth() + 1;
+                var date = mydate.getDate();
+                var hour = mydate.getHours();
+                var minute = mydate.getMinutes();
+                var yesterday = date - 1;
+                if (hour < 14) {
+                    document.write(year + '-' + month + '-' + yesterday + ' ' + '14:00');
+                } else {
+                    document.write(year + '-' + month + '-' + date + ' ' + '14:00');
+                }
+
+            </script>
+        </span></div>
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md6">
+                <div class="layui-panel">
+                    <div style="padding: 10px;">
+                        <div><font size="6px"><span th:text="${province}"></span>累计数据:</font></div>
+                        <br>
+                        <div class="layui-panel">
+                            <div class="layui-row">
+                                <div class="layui-col-md4">
+                                    <div align="center">确诊人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(confirmSeries[confirmSeries.length - 1]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md4">
+                                    <div align="center">死亡人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(deadSeries[deadSeries.length - 1]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md4">
+                                    <div align="center">治愈人数</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(healSeries[healSeries.length - 1]);</script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-panel">
+                    <div style="padding: 10px;">
+                        <div><font size="6px"><span th:text="${province}"></span>今日数据:</font></div>
+                        <br>
+                        <div class="layui-panel">
+                            <div class="layui-row">
+                                <div class="layui-col-md3">
+                                    <div align="center">现有确诊</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(confirmSeries[len - 1] - deadSeries[len - 1] - healSeries[len - 1]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">新增确诊</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(confirmSeries[len - 1] - confirmSeries[len - 2]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">新增死亡</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(deadSeries[len - 1] - deadSeries[len - 2]);</script>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <div align="center">新增治愈</div>
+                                    <br>
+                                    <div align="center">
+                                        <script type="text/javascript">document.write(healSeries[len - 1] - healSeries[len - 2]);</script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="layui-row layui-col-space10" style="width: 1500px">
+            <div class="layui-col-md12" style="background: white;height:500px" id="chart1">
+                <script type="text/javascript" th:inline="javascript">
+                    var series;
+                    var legend;
+                    if (data[0].country == '美国') {
+                        series = [{
+                            name: "确诊人数",
+                            type: 'line',
+                            smooth: true,
+                            data: confirmSeries
+                        },
+                            {
+                                name: "死亡人数",
+                                type: 'line',
+                                smooth: true,
+                                data: deadSeries
+                            }];
+                        legend = ['确诊人数', '死亡人数'];
+                    } else if (data[0].country == '中国') {
+                        series = [{
+                            name: "确诊人数",
+                            type: 'line',
+                            smooth: true,
+                            data: confirmSeries
+                        },
+                            {
+                                name: "死亡人数",
+                                type: 'line',
+                                smooth: true,
+                                data: deadSeries
+                            },
+                            {
+                                name: "治愈人数",
+                                type: 'line',
+                                smooth: true,
+                                data: healSeries
+                            }
+                        ];
+                        legend = ['确诊人数', '死亡人数', '治愈人数'];
+                    }
+                    var chart1 = echarts.init(document.getElementById('chart1'));
+                    option1 = {
+                        tooltip: {
+                            trigger: 'axis',
+
+                        },
+                        title: {
+                            text: [[${province}]] + '总体情况',
+                            subtext: '点击图例可切换展示'
+                        },
+                        legend: {
+                            data: legend
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: date1
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: series
+                    }
+                    chart1.setOption(option1);
+                </script>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space10" style="width:1500px">
+            <div align="center" style="background: white;width:1500px">
+                <form><input type="button" class="layui-btn layui-btn-radius layui-btn-normal layui-lg" value="导出数据">
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript" th:inline="javascript">
+            var csv = 'date,confirm,dead,heal' + '\n';
+            for (let i = 0; i < confirmSeries.length; i++) {
+                csv = csv + date1[i] + ',' + confirmSeries[i] + ',' + deadSeries[i] + ',' + healSeries[i] + '\n';
+            }
+            var eleButton = document.querySelector('input[type="button"]');
+            var funDownload = function (content, filename) {
+                var eleLink = document.createElement('a');
+                eleLink.download = filename;
+                eleLink.style.display = 'none';
+                // 字符内容转变成blob地址
+                var blob = new Blob([content]);
+                eleLink.href = URL.createObjectURL(blob);
+                // 触发点击
+                document.body.appendChild(eleLink);
+                eleLink.click();
+                // 然后移除
+                document.body.removeChild(eleLink);
+            };
+            if ('download' in document.createElement('a')) {
+                eleButton.addEventListener('click', function () {
+                    funDownload(csv, [[${province}]] + '.csv');
+                });
+            } else {
+                eleButton.onclick = function () {
+                    alert('浏览器不支持');
+                };
+            }
+        </script>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>搜索结果</title>
+    <!--<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/layui/2.6.5/layui.min.js}"></script>
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/layui/2.6.5/css/layui.min.css}">-->
+    <script src="/layui.js"></script>
+    <link rel="stylesheet" href="/layui.css">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.6.0/echarts.min.js"></script>
+</head>
+<body style="background: #CCFFFF;background-size: cover">
+<br><br><br>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" style="background: #FFFFFF;background-size: cover">
+        <div class="layui-logo"><a href="/" style="color:#5FB878">疫情数据可视化展示系统</a></div>
+        <ul class="layui-nav layui-layout-right">
+            <form class="layout-form" action="/search" method="post">
+                <li class="layui-nav-item">
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <input type="text" name="keyword" placeholder="请输入国家或省份" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                </li>
+                <li class="layui-nav-item" style="text-align: left">
+                    <div class="layui-form-item" style="text-align: left">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" name="button" lay-submit lay-filter="*">搜索</button>
+                        </div>
+                    </div>
+                </li>
+            </form>
+        </ul>
+    </div>
+    <div class="layui-main" align="left" style="width: 1440px" id="body">
+        <br><br><br>
+        <div style="color: #99CCFF" id="intro"><font size="8px"><spen th:text="${keyword}"></spen>的搜索结果:</font></div>
+        <table class="layui-table" lay-skin="line" lay-size="lg">
+            <tr th:each="coun:${country}">
+                <td><a th:href="@{/getcountrydata(name=${coun})}" th:text="${coun}"></a></td>
+            </tr>
+        </table>
+        <table class="layui-table" lay-skin="line" lay-size="lg">
+            <tr th:each="pro:${province}">
+                <td><a th:href="@{/getprovincedata(name=${pro})}" th:text="${pro}"></a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
